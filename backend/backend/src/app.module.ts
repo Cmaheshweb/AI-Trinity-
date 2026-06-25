@@ -6,18 +6,24 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DatabaseModule } from './database/database.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import dataSource from '../ormconfig'; // Import the DataSource configuration
+import { SubscriptionsModule } from './subscriptions/subscriptions.module'; // New
+import { CodeSessionsModule } from './code-sessions/code-sessions.module'; // New
+import { AwsModule } from './aws/aws.module'; // New
+import dataSource from '../ormconfig';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes the ConfigModule available everywhere
-      envFilePath: '.env', // Path to your environment file
+      isGlobal: true,
+      envFilePath: '.env',
     }),
-    TypeOrmModule.forRoot(dataSource.options), // Use the imported dataSource.options
-    DatabaseModule, // For database related configurations, though TypeOrmModule.forRoot handles primary connection
+    TypeOrmModule.forRoot(dataSource.options),
+    DatabaseModule,
     AuthModule,
     UsersModule,
+    SubscriptionsModule, // New module
+    CodeSessionsModule, // New module
+    AwsModule, // New module for AWS services
   ],
   controllers: [AppController],
   providers: [AppService],
