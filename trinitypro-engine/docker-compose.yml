@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    volumes:
+      - trinitypro_db_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432" # Map host port to container port
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_DATABASE}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: always
+    env_file:
+      - ./backend/.env # Use local .env for development
+    ports:
+      - "${PORT}:3000" # Map host port to container port
+    depends_on:
+      db:
+        condition: service_healthy # Ensure DB is ready before starting backend
+    # Optional: Run migrations on startup. Better handled separately in production.
+    # command: sh -c "yarn migration:run && node dist/main"
+    # volumes:
+    #   - ./backend:/app # For live reload during development (not for production)
+    #   - /app/node_modules # Exclude node_modules from being overwritten by host volume
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_API_URL: http://backend:3000 # Backend service name within Docker network
+    restart: always
+    env_file:
+      - ./frontend/.env.local # Use local .env.local for development
+    ports:
+      - "3001:3000" # Frontend on port 3001, Next.js internal is 3000
+    depends_on:
+      - backend
+
+volumes:
+  trinitypro_db_data:
