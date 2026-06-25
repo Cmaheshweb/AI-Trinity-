@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Spinner from '../../components/Spinner';
+import Link from 'next/link';
+import FeatureCard from '../../components/FeatureCard'; // New import
 
 const DashboardPage: React.FC = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -32,28 +34,31 @@ const DashboardPage: React.FC = () => {
       <p className="text-lg text-dark mb-6">{welcomeMessage}</p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div className="bg-light p-5 rounded-md shadow-sm">
-          <h2 className="text-2xl font-semibold text-dark mb-3">Code Generation</h2>
-          <p className="text-gray-700">Generate production-ready code snippets and full applications based on your specifications.</p>
-          <button className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition duration-200">Start Generating</button>
-        </div>
-
-        <div className="bg-light p-5 rounded-md shadow-sm">
-          <h2 className="text-2xl font-semibold text-dark mb-3">Code Debugging</h2>
-          <p className="text-gray-700">Upload your code, find bugs, security vulnerabilities, and get optimized solutions.</p>
-          <button className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition duration-200">Debug Code</button>
-        </div>
-
-        <div className="bg-light p-5 rounded-md shadow-sm">
-          <h2 className="text-2xl font-semibold text-dark mb-3">Deployment Assistance</h2>
-          <p className="text-gray-700">Get help deploying your applications to AWS with Dockerfiles, CI/CD, and configurations.</p>
-          <button className="mt-4 px-4 py-2 bg-primary text-white rounded-md hover:bg-secondary transition duration-200">Deploy App</button>
-        </div>
+        <FeatureCard
+          title="Code Generation"
+          description="Generate production-ready code snippets and full applications based on your specifications."
+          link="/generate"
+          buttonText="Start Generating"
+        />
+        <FeatureCard
+          title="Code Debugging"
+          description="Upload your code, find bugs, security vulnerabilities, and get optimized solutions."
+          link="/debug"
+          buttonText="Debug Code"
+        />
+        <FeatureCard
+          title="Deployment Assistance"
+          description="Get help deploying your applications to AWS with Dockerfiles, CI/CD, and configurations."
+          link="/deploy"
+          buttonText="Deploy App"
+        />
       </div>
 
       <div className="mt-8">
         <h2 className="text-3xl font-semibold text-dark mb-4">Your Recent Activity</h2>
-        <p className="text-gray-600">No recent activity yet. Start a new session!</p>
+        <Link href="/sessions">
+          <button className="px-4 py-2 bg-secondary text-white rounded-md hover:bg-primary transition duration-200">View All Sessions</button>
+        </Link>
         {/* Placeholder for future activity list */}
       </div>
     </div>
