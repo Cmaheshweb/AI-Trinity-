@@ -14,8 +14,12 @@ const Navbar: React.FC = () => {
         <Link href="/" className="text-xl font-bold text-primary hover:text-secondary">
           AI TrinityPro
         </Link>
-        <div className="space-x-4">
+        <div className="space-x-4 flex items-center">
           <Link href="/dashboard" className="hover:text-primary">Dashboard</Link>
+          {isAuthenticated && (
+            <Link href="/sessions" className="hover:text-primary">Sessions</Link>
+          )}
+
           {isAuthenticated ? (
             <>
               <span className="text-gray-300 hidden md:inline-block">Hello, {user?.firstName || user?.email}!</span>
@@ -23,7 +27,7 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <>
-              {!loading && ( // Only show login/register if not loading auth state
+              {!loading && (
                 <>
                   <Link href="/login" className="hover:text-primary">Login</Link>
                   <Link href="/register" className="hover:text-primary">Register</Link>
