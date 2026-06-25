@@ -1,0 +1,64 @@
+name: Backend CI/CD to AWS ECR
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci-cd.yml'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci-cd.yml'
+
+env:
+  AWS_REGION: ${{ secrets.AWS_REGION }}
+  ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+  ECR_REPOSITORY_BACKEND: ${{ secrets.AWS_ECR_REPOSITORY_BACKEND }}
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  build-and-push-backend:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Required for OIDC
+      contents: read
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole # Create this IAM role in AWS
+        aws-region: ${{ env.AWS_REGION }}
+        # If not using OIDC, use:
+        # aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        # aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+    - name: Login to Amazon ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Build and push backend Docker image
+      working-directory: ./backend
+      run: |
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG -t $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:latest .
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:latest
+    
+    # Optional: Deploy to ECS/Fargate (requires additional setup like ECS task definition, service update)
+    # This is a placeholder for actual deployment logic.
+    # - name: Deploy to Amazon ECS
+    #   if: github.ref == 'refs/heads/main'
+    #   uses: aws-actions/amazon-ecs-deploy@v1
+    #   with:
+    #     task-definition: your-backend-task-definition.json # Path to your task definition file
+    #     service: your-backend-ecs-service
+    #     cluster: your-ecs-cluster
+    #     wait-for-service-stability: true
+    #     image: $ECR_REGISTRY/$ECR_REPOSITORY_BACKEND:$IMAGE_TAG
